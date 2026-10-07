@@ -1,0 +1,57 @@
+name: Build Thai CEF Server Plugin
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  workflow_dispatch:
+
+jobs:
+  build_windows:
+    name: Build cef.dll (Windows Server)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust i686
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          targets: i686-pc-windows-msvc
+
+      - name: Build cef.dll
+        run: cargo build --package cef-server --release --target i686-pc-windows-msvc
+
+      - name: Upload cef.dll
+        uses: actions/upload-artifact@v4
+        with:
+          name: cef-windows
+          path: target/i686-pc-windows-msvc/release/cef_server.dll
+
+  build_linux:
+    name: Build cef.so (Linux Server)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build deps
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y build-essential gcc-multilib g++-multilib
+
+      - name: Install Rust i686
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          targets: i686-unknown-linux-gnu
+
+      - name: Build cef.so
+        run: |
+          cargo build --package cef-server --release --target i686-unknown-linux-gnu
+          strip -s target/i686-unknown-linux-gnu/release/libcef_server.so -o cef.so
+
+      - name: Upload cef.so
+        uses: actions/upload-artifact@v4
+        with:
+          name: cef-linux
+          path: cef.so
