@@ -337,7 +337,7 @@ initialize_plugin!(
     ],
     {
         samp::plugin::enable_process_tick();
-        samp::encoding::set_default_encoding(samp::encoding::WINDOWS_1251);
+        samp::encoding::set_default_encoding(encoding_rs::UTF_8);
         let _ = samp::plugin::logger();
         let (log_level, invalid_log_level) = server_log_level();
         let filter = Targets::new()
